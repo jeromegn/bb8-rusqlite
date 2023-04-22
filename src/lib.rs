@@ -42,7 +42,7 @@ enum OpenMode {
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     /// A rusqlite error.
-    #[error("rusqlite error")]
+    #[error("rusqlite error: {0}")]
     Rusqlite(#[from] rusqlite::Error),
 
     /// A tokio join handle error.
@@ -111,10 +111,7 @@ impl ManageConnection for RusqliteConnectionManager {
         .await??)
     }
 
-    async fn is_valid(
-        &self,
-        conn: &mut Self::Connection,
-    ) -> Result<(), Self::Error> {
+    async fn is_valid(&self, conn: &mut Self::Connection) -> Result<(), Self::Error> {
         // Matching bb8-postgres, we'll try to run a trivial query here. Using
         // block_in_place() gives better behaviour if the SQLite call blocks for
         // some reason, but means that we depend on the tokio multi-threaded
